@@ -33,6 +33,7 @@ RCT_EXPORT_MODULE();
   #if !(TARGET_IPHONE_SIMULATOR)
     self.previewLayer = [AVCaptureVideoPreviewLayer layerWithSession:self.session];
     self.previewLayer.needsDisplayOnBoundsChange = YES;
+    
   #endif
   
   if(!self.camera){
@@ -266,6 +267,7 @@ RCT_CUSTOM_VIEW_PROPERTY(barCodeTypes, NSArray, RCTCamera) {
 
 RCT_CUSTOM_VIEW_PROPERTY(captureAudio, BOOL, RCTCamera) {
   BOOL captureAudio = [RCTConvert BOOL:json];
+  self.captureAudio = captureAudio;
   if (captureAudio) {
     RCTLog(@"capturing audio");
     [self initializeCaptureSessionInput:AVMediaTypeAudio];
@@ -300,10 +302,15 @@ RCT_EXPORT_METHOD(checkDeviceAuthorizationStatus:(RCTPromiseResolveBlock)resolve
       resolve(@(granted));
     }
     else {
-      mediaType = AVMediaTypeAudio;
-      [AVCaptureDevice requestAccessForMediaType:mediaType completionHandler:^(BOOL granted) {
-        resolve(@(granted));
-      }];
+        if (self.captureAudio) {
+            mediaType = AVMediaTypeAudio;
+            [AVCaptureDevice requestAccessForMediaType:mediaType completionHandler:^(BOOL granted) {
+                resolve(@(granted));
+            }];
+
+        } else {
+            resolve(@(granted));
+        }
     }
   }];
 }
@@ -980,6 +987,7 @@ didFinishRecordingToOutputFileAtURL:(NSURL *)outputFileURL
 
 - (void)setCaptureQuality:(NSString *)quality
 {
+#if !(TARGET_IPHONE_SIMULATOR)
     if (quality) {
         [self.session beginConfiguration];
         if ([self.session canSetSessionPreset:quality]) {
@@ -987,6 +995,7 @@ didFinishRecordingToOutputFileAtURL:(NSURL *)outputFileURL
         }
         [self.session commitConfiguration];
     }
+#endif
 }
 
 @end
