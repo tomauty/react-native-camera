@@ -6,7 +6,7 @@
 //
 //
 
-#import "RCTSensorOrientationChecker.h"
+#import <React/RCTSensorOrientationChecker.h>
 #import <CoreMotion/CoreMotion.h>
 
 
